@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1781103957186,
+      "tag": "0000_robust_grim_reaper",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781279031762,
+      "tag": "0001_complex_loners",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781281605579,
+      "tag": "0002_warm_sentry",
+      "breakpoints": true
+    }
+  ]
+}

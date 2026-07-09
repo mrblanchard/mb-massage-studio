@@ -1,20 +1,18 @@
+import { Prose } from "@/components/ui/prose";
+import { cn } from "@/lib/utils";
 import type { RichTextContent } from "@/lib/sections/schemas/rich-text";
 
-export function RichTextSection({ content }: { content: RichTextContent }) {
-  const paragraphs = content.body.split(/\n{2,}/).filter((p) => p.trim().length > 0);
-
+export function RichTextSection({ content, id }: { content: RichTextContent; id?: string }) {
   return (
-    <section className="mx-auto max-w-3xl px-4 py-16">
+    <section
+      id={id}
+      aria-labelledby={id && content.heading ? `${id}-heading` : undefined}
+      className="mx-auto max-w-3xl px-4 py-16"
+    >
       {content.heading && (
-        <h2 className="text-3xl font-bold tracking-tight">{content.heading}</h2>
+        <h2 id={id ? `${id}-heading` : undefined} className="text-3xl tracking-tight">{content.heading}</h2>
       )}
-      <div className="mt-4 flex flex-col gap-4 text-muted-foreground">
-        {paragraphs.map((paragraph, index) => (
-          <p key={index} className="whitespace-pre-line">
-            {paragraph}
-          </p>
-        ))}
-      </div>
+      <Prose html={content.body} className={cn("text-muted-foreground", content.heading && "mt-4")} />
     </section>
   );
 }

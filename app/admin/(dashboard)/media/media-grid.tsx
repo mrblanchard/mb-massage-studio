@@ -194,6 +194,7 @@ export function MediaGrid({ items }: { items: MediaGridItem[] }) {
                   src={item.url}
                   alt={item.alt ?? item.filename ?? ""}
                   fill
+                  sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw"
                   className="object-cover"
                 />
               </div>
@@ -256,7 +257,7 @@ export function MediaGrid({ items }: { items: MediaGridItem[] }) {
           </DialogHeader>
           {editingItem && (
             <div className="relative aspect-video w-full overflow-hidden rounded-md bg-muted">
-              <Image src={editingItem.url} alt="" fill className="object-cover" />
+              <Image src={editingItem.url} alt="" fill sizes="(min-width: 640px) 500px, 100vw" className="object-cover" />
             </div>
           )}
           <Field>

@@ -22,6 +22,8 @@ export const sectionTypeEnum = pgEnum("section_type", [
   "contact",
   "rich_text",
   "blog_list",
+  "two_column",
+  "columns",
 ]);
 
 export const socialPlatformEnum = pgEnum("social_platform", [
@@ -59,10 +61,32 @@ export const siteSettings = pgTable("site_settings", {
   secondaryColor: text("secondary_color").default("#f5f5f5"),
   fontHeading: text("font_heading").default("Inter"),
   fontBody: text("font_body").default("Inter"),
+  baseFontSize: text("base_font_size").default("medium"),
+  typography: jsonb("typography")
+    .$type<
+      Partial<
+        Record<
+          "h1" | "h2" | "h3" | "h4" | "body" | "small" | "button" | "link",
+          {
+            fontFamily?: string;
+            fontSize?: number;
+            color?: string;
+            backgroundColor?: string;
+            fontWeight?: "400" | "500" | "600" | "700" | "800";
+            letterSpacing?: number;
+            lineHeight?: number;
+          }
+        >
+      >
+    >()
+    .notNull()
+    .default({}),
   navLinks: jsonb("nav_links")
     .$type<{ label: string; href: string }[]>()
     .notNull()
     .default([]),
+  headerCtaLabel: text("header_cta_label"),
+  headerCtaHref: text("header_cta_href"),
   socialLinks: jsonb("social_links")
     .$type<Record<string, string>>()
     .notNull()
@@ -76,6 +100,14 @@ export const siteSettings = pgTable("site_settings", {
     }>()
     .notNull()
     .default({}),
+  enableSidebarNav: boolean("enable_sidebar_nav").notNull().default(false),
+  sidebarNavPosition: text("sidebar_nav_position").default("left"),
+  navScrollTransition: text("nav_scroll_transition").default("medium"),
+  headerSticky: boolean("header_sticky").notNull().default(true),
+  footerColumns: jsonb("footer_columns")
+    .$type<{ heading?: string; body?: string; links: { label: string; href: string }[] }[]>()
+    .notNull()
+    .default([]),
   contactEmail: text("contact_email"),
   cfAnalyticsToken: text("cf_analytics_token"),
   updatedAt: timestamp("updated_at", { withTimezone: true })
@@ -151,10 +183,11 @@ export const media = pgTable("media", {
 
 export const contactSubmissions = pgTable("contact_submissions", {
   id: uuid("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull(),
-  email: text("email").notNull(),
+  name: text("name"),
+  email: text("email"),
   phone: text("phone"),
-  message: text("message").notNull(),
+  message: text("message"),
+  data: jsonb("data").$type<Record<string, string>>().notNull().default({}),
   read: boolean("read").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

@@ -19,3 +19,14 @@ export async function getPageBySlug(slug: string): Promise<PageWithSections | nu
 
   return page ?? null;
 }
+
+export type Page = typeof pages.$inferSelect;
+
+export async function getPageById(id: string): Promise<Page | null> {
+  const page = await db.query.pages.findFirst({ where: eq(pages.id, id) });
+  return page ?? null;
+}
+
+export async function getAllPages(): Promise<Page[]> {
+  return db.query.pages.findMany({ orderBy: [asc(pages.createdAt)] });
+}

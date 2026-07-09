@@ -1,4 +1,6 @@
 import { AboutEditForm } from "@/components/edit/forms/about-form";
+import { ColumnsEditForm } from "@/components/edit/forms/columns-form";
+import { TwoColumnEditForm } from "@/components/edit/forms/two-column-form";
 import { BlogListEditForm } from "@/components/edit/forms/blog-list-form";
 import { ContactEditForm } from "@/components/edit/forms/contact-form";
 import { CtaEditForm } from "@/components/edit/forms/cta-form";
@@ -9,6 +11,8 @@ import { ServicesEditForm } from "@/components/edit/forms/services-form";
 import { TestimonialsEditForm } from "@/components/edit/forms/testimonials-form";
 import { AboutSection } from "@/components/sections/about";
 import { BlogListSection } from "@/components/sections/blog-list";
+import { ColumnsSection } from "@/components/sections/columns";
+import { TwoColumnSection } from "@/components/sections/two-column";
 import { ContactSection } from "@/components/sections/contact";
 import { CtaSection } from "@/components/sections/cta";
 import { GallerySection } from "@/components/sections/gallery";
@@ -18,6 +22,8 @@ import { ServicesSection } from "@/components/sections/services";
 import { TestimonialsSection } from "@/components/sections/testimonials";
 import { aboutDefaultContent, aboutSchema } from "@/lib/sections/schemas/about";
 import { blogListDefaultContent, blogListSchema } from "@/lib/sections/schemas/blog-list";
+import { columnsDefaultContent, columnsSchema } from "@/lib/sections/schemas/columns";
+import { twoColumnDefaultContent, twoColumnSchema } from "@/lib/sections/schemas/two-column";
 import { contactDefaultContent, contactSchema } from "@/lib/sections/schemas/contact";
 import { ctaDefaultContent, ctaSchema } from "@/lib/sections/schemas/cta";
 import { galleryDefaultContent, gallerySchema } from "@/lib/sections/schemas/gallery";
@@ -104,6 +110,22 @@ export const sectionRegistry: Partial<Record<SectionType, SectionDefinition<Sect
     defaultContent: blogListDefaultContent,
     Component: BlogListSection,
     EditForm: BlogListEditForm,
+  }),
+  two_column: defineSection({
+    type: "two_column",
+    label: "Two Column",
+    schema: twoColumnSchema,
+    defaultContent: twoColumnDefaultContent,
+    Component: TwoColumnSection,
+    EditForm: TwoColumnEditForm,
+  }),
+  columns: defineSection({
+    type: "columns",
+    label: "Columns",
+    schema: columnsSchema,
+    defaultContent: columnsDefaultContent,
+    Component: ColumnsSection,
+    EditForm: ColumnsEditForm,
   }),
 };
 

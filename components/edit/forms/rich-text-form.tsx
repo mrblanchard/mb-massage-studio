@@ -3,10 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
+import { RichTextEditor } from "@/components/edit/rich-text-editor";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { richTextSchema, type RichTextContent } from "@/lib/sections/schemas/rich-text";
 import type { SectionEditFormProps } from "@/lib/sections/types";
 
@@ -43,8 +43,7 @@ export function RichTextEditForm({
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid || undefined}>
               <FieldLabel htmlFor="body">Body</FieldLabel>
-              <Textarea id="body" rows={10} aria-invalid={fieldState.invalid} {...field} />
-              <FieldDescription>Separate paragraphs with a blank line.</FieldDescription>
+              <RichTextEditor value={field.value} onChange={field.onChange} />
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}

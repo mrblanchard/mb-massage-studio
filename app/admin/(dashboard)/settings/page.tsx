@@ -1,9 +1,19 @@
+import { getPageBySlug } from "@/lib/db/queries/pages";
 import { getSiteSettings } from "@/lib/db/queries/site-settings";
+import { sectionRegistry } from "@/lib/sections/registry";
 
 import { SettingsForm } from "./settings-form";
 
 export default async function AdminSettingsPage() {
-  const settings = await getSiteSettings();
+  const [settings, homePage] = await Promise.all([
+    getSiteSettings(),
+    getPageBySlug(""),
+  ]);
+
+  const homeSections = (homePage?.sections ?? []).map((s) => ({
+    id: s.id,
+    label: sectionRegistry[s.type]?.label ?? s.type,
+  }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -14,7 +24,7 @@ export default async function AdminSettingsPage() {
           contact information.
         </p>
       </div>
-      <SettingsForm settings={settings} />
+      <SettingsForm settings={settings} homeSections={homeSections} />
     </div>
   );
 }

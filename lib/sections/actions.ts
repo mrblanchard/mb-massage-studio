@@ -1,6 +1,6 @@
 "use server";
 
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, gt, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { requireAuth } from "@/lib/auth/require-auth";
@@ -44,7 +44,12 @@ export async function updateSectionContent(sectionId: string, content: SectionCo
   return { success: true };
 }
 
-export async function addSection(pageId: string, type: SectionType) {
+export async function addSection(
+  pageId: string,
+  type: SectionType,
+  afterSectionId?: string | null,
+  initialContent?: SectionContent,
+) {
   await requireAuth();
 
   const definition = sectionRegistry[type];
@@ -52,25 +57,59 @@ export async function addSection(pageId: string, type: SectionType) {
     return { error: "Unknown section type." };
   }
 
-  const lastSection = await db.query.sections.findFirst({
-    where: eq(sections.pageId, pageId),
-    orderBy: [desc(sections.order)],
-  });
-  const order = lastSection ? lastSection.order + 1 : 0;
+  const content = initialContent ?? definition.defaultContent;
 
-  const [newSection] = await db
-    .insert(sections)
-    .values({
-      pageId,
-      type,
-      order,
-      content: definition.defaultContent,
-    })
-    .returning();
+  // Append to end (original behavior when afterSectionId is undefined)
+  if (afterSectionId === undefined) {
+    const lastSection = await db.query.sections.findFirst({
+      where: eq(sections.pageId, pageId),
+      orderBy: [desc(sections.order)],
+    });
+    const order = lastSection ? lastSection.order + 1 : 0;
+
+    const [newSection] = await db
+      .insert(sections)
+      .values({ pageId, type, order, content })
+      .returning();
+
+    await revalidatePageBySlug(pageId);
+    return { success: true, sectionId: newSection.id };
+  }
+
+  // Insert at the beginning
+  if (afterSectionId === null) {
+    await db.transaction(async (tx) => {
+      await tx
+        .update(sections)
+        .set({ order: sql`${sections.order} + 1`, updatedAt: new Date() })
+        .where(eq(sections.pageId, pageId));
+
+      await tx.insert(sections).values({ pageId, type, order: 0, content });
+    });
+
+    await revalidatePageBySlug(pageId);
+    return { success: true };
+  }
+
+  // Insert after a specific section
+  const target = await db.query.sections.findFirst({
+    where: eq(sections.id, afterSectionId),
+  });
+  if (!target) {
+    return { error: "Target section not found." };
+  }
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(sections)
+      .set({ order: sql`${sections.order} + 1`, updatedAt: new Date() })
+      .where(and(eq(sections.pageId, pageId), gt(sections.order, target.order)));
+
+    await tx.insert(sections).values({ pageId, type, order: target.order + 1, content });
+  });
 
   await revalidatePageBySlug(pageId);
-
-  return { success: true, sectionId: newSection.id };
+  return { success: true };
 }
 
 export async function deleteSection(sectionId: string) {

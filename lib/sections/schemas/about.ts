@@ -10,5 +10,5 @@ export type AboutContent = z.infer<typeof aboutSchema>;
 
 export const aboutDefaultContent: AboutContent = {
   heading: "About Us",
-  body: "Share your story here. Explain who you are, what you offer, and what makes your business different.",
+  body: "<p>Share your story here. Explain who you are, what you offer, and what makes your business different.</p>",
 };

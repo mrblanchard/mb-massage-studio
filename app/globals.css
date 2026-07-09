@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -127,4 +128,19 @@
   html {
     @apply font-sans;
   }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading, var(--font-sans));
+    font-weight: var(--font-heading-weight, 700);
+  }
+}
+
+/* Edit Mode hover affordance: dashed red border on any text/button/link so
+   it's obvious what's clickable, plus a white hairline for contrast on
+   dark/photo backgrounds. Left un-layered so it isn't out-ranked by
+   Tailwind's utility layer. Only active while Edit Mode is on. */
+.site-content.is-edit-mode :is(h1, h2, h3, h4, h5, h6, p, small, [data-slot="button"], a):hover {
+  outline: 2px dashed var(--destructive);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6);
+  cursor: pointer;
 }

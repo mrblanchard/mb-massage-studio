@@ -4,13 +4,17 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { BlogListContent } from "@/lib/sections/schemas/blog-list";
 
-export function BlogListSection({ content }: { content: BlogListContent }) {
+export function BlogListSection({ content, id }: { content: BlogListContent; id?: string }) {
   const posts = content.posts ?? [];
 
   return (
-    <section className="mx-auto max-w-5xl px-4 py-16">
+    <section
+      id={id}
+      aria-labelledby={id && content.heading ? `${id}-heading` : undefined}
+      className="mx-auto max-w-5xl px-4 py-16"
+    >
       {content.heading && (
-        <h2 className="text-center text-3xl font-bold tracking-tight">{content.heading}</h2>
+        <h2 id={id ? `${id}-heading` : undefined} className="text-center text-3xl tracking-tight">{content.heading}</h2>
       )}
       {posts.length > 0 ? (
         <div className={cn("grid gap-8 sm:grid-cols-2 lg:grid-cols-3", content.heading && "mt-10")}>

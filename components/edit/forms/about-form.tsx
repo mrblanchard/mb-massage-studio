@@ -6,8 +6,8 @@ import { Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { ImageUpload } from "@/components/edit/image-upload";
+import { RichTextEditor } from "@/components/edit/rich-text-editor";
 import { aboutSchema, type AboutContent } from "@/lib/sections/schemas/about";
 import type { SectionEditFormProps } from "@/lib/sections/types";
 
@@ -41,7 +41,7 @@ export function AboutEditForm({ content, onSave, isSaving }: SectionEditFormProp
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid || undefined}>
               <FieldLabel htmlFor="body">Body</FieldLabel>
-              <Textarea id="body" rows={6} aria-invalid={fieldState.invalid} {...field} />
+              <RichTextEditor value={field.value} onChange={field.onChange} />
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}

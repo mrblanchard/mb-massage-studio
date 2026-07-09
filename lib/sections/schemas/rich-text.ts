@@ -9,5 +9,5 @@ export type RichTextContent = z.infer<typeof richTextSchema>;
 
 export const richTextDefaultContent: RichTextContent = {
   heading: "",
-  body: "Write your content here. Separate paragraphs with a blank line.",
+  body: "<p>Write your content here. Use the toolbar to add formatting like bold text, links, and lists.</p>",
 };

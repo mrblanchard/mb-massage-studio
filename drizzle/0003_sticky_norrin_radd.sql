@@ -1,0 +1,1 @@
+ALTER TABLE "site_settings" ADD COLUMN "footer_columns" jsonb DEFAULT '[]'::jsonb NOT NULL;

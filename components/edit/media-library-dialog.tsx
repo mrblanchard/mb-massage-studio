@@ -56,7 +56,13 @@ export function MediaLibraryDialog({ onSelect }: { onSelect: (url: string) => vo
                     setOpen(false);
                   }}
                 >
-                  <Image src={item.url} alt={item.filename ?? ""} fill className="object-cover" />
+                  <Image
+                    src={item.url}
+                    alt={item.filename ?? ""}
+                    fill
+                    sizes="(min-width: 640px) 25vw, 33vw"
+                    className="object-cover"
+                  />
                 </button>
               ))}
             </div>

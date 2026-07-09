@@ -18,6 +18,7 @@ export default async function AdminInboxPage() {
           email: submission.email,
           phone: submission.phone,
           message: submission.message,
+          data: submission.data,
           read: submission.read,
           createdAt: submission.createdAt.toLocaleString(),
         }))}

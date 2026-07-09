@@ -9,13 +9,15 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 
-import { AddSectionPicker } from "@/components/edit/add-section-picker";
+import { InsertSectionPicker } from "@/components/edit/insert-section-picker";
 import { SectionWrapper } from "@/components/edit/section-wrapper";
 import { useEditMode } from "@/lib/edit/edit-mode-context";
-import { reorderSections } from "@/lib/sections/actions";
+import { addSection, reorderSections } from "@/lib/sections/actions";
 import { sectionRegistry } from "@/lib/sections/registry";
+import { uploadImage } from "@/lib/uploads/upload-image";
 import type { SectionContent, SectionType } from "@/lib/sections/types";
 
 export interface SectionListItem {
@@ -28,6 +30,11 @@ export function SectionList({ pageId, sections }: { pageId: string; sections: Se
   const { isEditMode } = useEditMode();
   const [order, setOrder] = useState(() => sections.map((section) => section.id));
   const [, startTransition] = useTransition();
+  const [, startUpload] = useTransition();
+
+  // File drag-over detection
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const dragCounter = useRef(0);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -53,28 +60,96 @@ export function SectionList({ pageId, sections }: { pageId: string; sections: Se
     });
   }
 
+  function makeFileDrop(afterSectionId: string | null) {
+    return (file: File) => {
+      startUpload(async () => {
+        try {
+          const url = await uploadImage(file);
+          await addSection(pageId, "gallery", afterSectionId, {
+            heading: "",
+            images: [{ url, caption: "" }],
+          });
+          toast.success("Image added as gallery section.");
+        } catch {
+          toast.error("Failed to upload image.");
+        }
+      });
+    };
+  }
+
+  function handleContainerDragEnter(e: React.DragEvent<HTMLDivElement>) {
+    if (!isEditMode || !e.dataTransfer.types.includes("Files")) return;
+    dragCounter.current++;
+    setIsDraggingFile(true);
+  }
+
+  function handleContainerDragLeave() {
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDraggingFile(false);
+    }
+  }
+
+  function handleContainerDragOver(e: React.DragEvent<HTMLDivElement>) {
+    if (e.dataTransfer.types.includes("Files")) {
+      e.preventDefault();
+    }
+  }
+
+  function handleContainerDrop(e: React.DragEvent<HTMLDivElement>) {
+    if (e.dataTransfer.types.includes("Files")) {
+      // Individual zone drop handlers will fire first; this resets state
+      dragCounter.current = 0;
+      setIsDraggingFile(false);
+    }
+  }
+
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={order} strategy={verticalListSortingStrategy}>
-        {orderedSections.map((section) => {
-          const definition = sectionRegistry[section.type];
-          if (!definition) {
-            return null;
-          }
+    <div
+      onDragEnter={handleContainerDragEnter}
+      onDragLeave={handleContainerDragLeave}
+      onDragOver={handleContainerDragOver}
+      onDrop={handleContainerDrop}
+    >
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={order} strategy={verticalListSortingStrategy}>
+          {isEditMode && (
+            <InsertSectionPicker
+              pageId={pageId}
+              afterSectionId={null}
+              isFileDropTarget={isDraggingFile}
+              onFileDrop={makeFileDrop(null)}
+            />
+          )}
+          {orderedSections.map((section) => {
+            const definition = sectionRegistry[section.type];
+            if (!definition) {
+              return null;
+            }
 
-          const parsed = definition.schema.safeParse(section.content);
-          const content: SectionContent = parsed.success ? parsed.data : definition.defaultContent;
+            const parsed = definition.schema.safeParse(section.content);
+            const content: SectionContent = parsed.success ? parsed.data : definition.defaultContent;
 
-          const Component = definition.Component;
+            const Component = definition.Component;
 
-          return (
-            <SectionWrapper key={section.id} sectionId={section.id} sectionType={section.type} content={content}>
-              <Component content={content} />
-            </SectionWrapper>
-          );
-        })}
-      </SortableContext>
-      {isEditMode && <AddSectionPicker pageId={pageId} />}
-    </DndContext>
+            return (
+              <div key={section.id}>
+                <SectionWrapper sectionId={section.id} sectionType={section.type} content={content}>
+                  <Component content={content} id={section.id} />
+                </SectionWrapper>
+                {isEditMode && (
+                  <InsertSectionPicker
+                    pageId={pageId}
+                    afterSectionId={section.id}
+                    isFileDropTarget={isDraggingFile}
+                    onFileDrop={makeFileDrop(section.id)}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </SortableContext>
+      </DndContext>
+    </div>
   );
 }

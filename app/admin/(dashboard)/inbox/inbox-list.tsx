@@ -11,10 +11,11 @@ import { deleteSubmission, setSubmissionRead } from "./actions";
 
 interface SubmissionItem {
   id: string;
-  name: string;
-  email: string;
+  name: string | null;
+  email: string | null;
   phone: string | null;
-  message: string;
+  message: string | null;
+  data: Record<string, string>;
   read: boolean;
   createdAt: string;
 }
@@ -56,13 +57,15 @@ export function InboxList({ submissions }: { submissions: SubmissionItem[] }) {
           <CardHeader className="flex-row items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-semibold">{submission.name}</span>
+                <span className="font-semibold">{submission.name ?? "Message"}</span>
                 {!submission.read && <Badge>New</Badge>}
               </div>
               <div className="text-sm text-muted-foreground">
-                <a href={`mailto:${submission.email}`} className="hover:underline">
-                  {submission.email}
-                </a>
+                {submission.email && (
+                  <a href={`mailto:${submission.email}`} className="hover:underline">
+                    {submission.email}
+                  </a>
+                )}
                 {submission.phone && <span> · {submission.phone}</span>}
               </div>
               <div className="text-xs text-muted-foreground">{submission.createdAt}</div>
@@ -88,8 +91,20 @@ export function InboxList({ submissions }: { submissions: SubmissionItem[] }) {
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
-            <p className="whitespace-pre-line text-sm">{submission.message}</p>
+          <CardContent className="flex flex-col gap-2">
+            {submission.message && (
+              <p className="whitespace-pre-line text-sm">{submission.message}</p>
+            )}
+            {Object.entries(submission.data).length > 0 && (
+              <dl className="flex flex-col gap-1 text-sm">
+                {Object.entries(submission.data).map(([label, value]) => (
+                  <div key={label}>
+                    <dt className="inline font-medium">{label}: </dt>
+                    <dd className="inline whitespace-pre-line text-muted-foreground">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </CardContent>
         </Card>
       ))}

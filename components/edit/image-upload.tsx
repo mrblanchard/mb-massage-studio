@@ -66,7 +66,7 @@ export function ImageUpload({ value, onChange, allowManualUrl }: ImageUploadProp
     <div className="flex flex-col gap-2">
       {value && (
         <div className="relative aspect-video w-full overflow-hidden rounded-md border">
-          <Image src={value} alt="" fill className="object-cover" />
+          <Image src={value} alt="" fill sizes="100vw" className="object-cover" />
           <Button
             type="button"
             variant="secondary"

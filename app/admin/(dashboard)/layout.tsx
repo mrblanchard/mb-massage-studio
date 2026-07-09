@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 
 const baseNavItems = [
   { href: "/admin", label: "Dashboard" },
+  { href: "/admin/pages", label: "Pages" },
   { href: "/admin/inbox", label: "Inbox" },
   { href: "/admin/blog", label: "Blog" },
   { href: "/admin/social", label: "Social" },

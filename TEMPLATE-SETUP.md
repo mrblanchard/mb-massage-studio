@@ -2,7 +2,35 @@
 
 This repo is a clone-and-deploy template: every client gets their own copy of
 this codebase, their own Neon database, their own R2 media bucket, and their
-own Coolify app + domain. Follow these steps in order for each new client.
+own Vercel project + domain.
+
+## 0. Fully automated path (recommended)
+
+Steps 1-4 and 6 below can be done in one shot with:
+
+```
+npm run new-client -- --name acme-co --domain acmeco.com
+```
+
+This creates the GitHub repo (from this template), the Neon project, the R2
+bucket (+ public URL, CORS, scoped API key), runs migrations + seeds the
+owner account and starter content, creates the Vercel project, sets all
+required env vars, and attaches the domain. It reads operator credentials
+(GitHub/Neon/Cloudflare/Vercel API tokens) from a local `.env.automation` file
+- copy `.env.automation.example` to `.env.automation` and fill it in once.
+
+Add `--dry-run` to preview what it would do without touching any service, and
+omit `--domain` to get a `*.vercel.app` URL instead of a custom domain. See
+`scripts/new-client.ts` for all flags.
+
+The script is **not safely re-runnable** for the same `--name` - a second run
+would create duplicate resources. If it fails partway through, it prints
+every resource already created (with dashboard links) so you can clean up or
+finish the remaining steps by hand using the walkthrough below.
+
+Whatever the script can't safely automate (DNS records, analytics tokens,
+sender domain verification) is printed as a checklist at the end - see
+step 7 below for the same list.
 
 ## 1. Create the client's repo
 
@@ -69,36 +97,28 @@ Re-running `npm run seed` is safe — it skips anything that already exists.
 
 ## 5. DNS (Cloudflare)
 
-Add a DNS record for the client's domain (e.g. `A` or `CNAME`) pointing at
-the Linode server's IP, proxied through Cloudflare (orange cloud) for CDN +
-Web Analytics.
+Add a DNS record for the client's domain (e.g. `A`/`ALIAS` or `CNAME`)
+pointing at whatever Vercel's domain-attach step (step 6 below) tells you to
+point at, proxied through Cloudflare (orange cloud) for CDN + Web Analytics
+if desired.
 
-## 6. Deploy (Coolify)
+## 6. Deploy (Vercel)
 
-1. In Coolify, create a new **Application** from the client's git repo. Coolify
-   will detect and build the `Dockerfile`.
-2. Set **environment variables** (Coolify → app → Environment Variables) using
-   the values from the client's `.env`. See the
-   [Environment variable reference](#environment-variable-reference) below —
-   **five of these must also be marked as "Build Variables"** so they're
-   available during `npm run build` inside the Docker image, not just at
-   runtime:
-
-   - `DATABASE_URL`
-   - `AUTH_SECRET`
-   - `NEXT_PUBLIC_SITE_URL`
-   - `NEXT_PUBLIC_CF_ANALYTICS_TOKEN`
-   - `R2_PUBLIC_URL`
-
-   Generate `AUTH_SECRET` with `npx auth secret` if you haven't already.
-
-   Also set `AUTH_TRUST_HOST=true` as a normal (runtime-only) environment
-   variable — required because the app sits behind Coolify's reverse proxy.
-   Without it, every `/api/auth/*` request fails with an `UntrustedHost`
-   error.
-
-3. Attach the client's domain (from step 5) to the app and enable SSL.
-4. Deploy.
+1. In Vercel, **Add New → Project**, and import the client's GitHub repo.
+   Vercel auto-detects Next.js — no build configuration needed.
+2. Set **environment variables** (Project → Settings → Environment Variables)
+   using the values from the client's `.env`. Unlike a Docker/self-host
+   deploy, Vercel injects every project env var into its own build
+   automatically — there's no separate "build variable" vs. "runtime
+   variable" distinction to manage.
+3. Leave `AUTH_TRUST_HOST` **unset**. Auth.js v5 automatically trusts the
+   host when running on Vercel (it detects `VERCEL=1`); setting it isn't
+   needed and isn't part of `.env.example`'s Vercel guidance.
+4. Attach the client's domain under Project → Settings → Domains. Vercel will
+   show you the DNS record(s) to add at whatever host controls that domain
+   (step 5 above).
+5. Deploy. Every subsequent `git push` to the repo's default branch
+   redeploys automatically; other branches/PRs get their own preview URL.
 
 ## 7. Go live
 
@@ -114,9 +134,53 @@ Web Analytics.
 > password during seeding (step 3) — that's the credential the owner will use
 > going forward.
 
+Remaining steps that can't be safely automated:
+
+- **Cloudflare Web Analytics token**: create in the Cloudflare dashboard
+  (Analytics & Logs → Web Analytics → add site) once the domain is resolving,
+  then set `NEXT_PUBLIC_CF_ANALYTICS_TOKEN` in Vercel (or `/admin/settings`).
+- **Resend sender verification**: if contact-form emails are needed, verify
+  the sending domain in Resend's dashboard (adds SPF/DKIM DNS records), then
+  set `RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `CONTACT_EMAIL_TO` in Vercel.
+- **R2 custom domain** for media (optional upgrade from the `r2.dev` public
+  URL) — requires its own DNS record.
+- Transferring the GitHub repo or Vercel project to a client-owned
+  account/team, if applicable.
+
 ---
 
-## Local image testing (Podman)
+## Appendix: self-hosting with Docker (Coolify/Podman/other)
+
+The included `Dockerfile` is kept for clients who need self-hosting instead
+of Vercel (data residency requirements, no Vercel budget, etc.). This path is
+not covered by `npm run new-client` — follow it manually.
+
+### Deploy (Coolify)
+
+1. In Coolify, create a new **Application** from the client's git repo. Coolify
+   will detect and build the `Dockerfile`.
+2. Set **environment variables** (Coolify → app → Environment Variables) using
+   the values from the client's `.env`. **Five of these must also be marked
+   as "Build Variables"** so they're available during `npm run build` inside
+   the Docker image, not just at runtime:
+
+   - `DATABASE_URL`
+   - `AUTH_SECRET`
+   - `NEXT_PUBLIC_SITE_URL`
+   - `NEXT_PUBLIC_CF_ANALYTICS_TOKEN`
+   - `R2_PUBLIC_URL`
+
+   Generate `AUTH_SECRET` with `npx auth secret` if you haven't already.
+
+   Also set `AUTH_TRUST_HOST=true` as a normal (runtime-only) environment
+   variable — required because the app sits behind Coolify's reverse proxy.
+   Without it, every `/api/auth/*` request fails with an `UntrustedHost`
+   error.
+
+3. Attach the client's domain to the app and enable SSL.
+4. Deploy.
+
+### Local image testing (Podman)
 
 Before deploying, you can build and run the production image locally with
 Podman (a drop-in replacement for the `docker` CLI — `podman build`/
@@ -157,9 +221,7 @@ podman run --rm -p 3000:3000 `
 
 Then open `http://localhost:3000`.
 
----
-
-## Environment variable reference
+### Environment variable reference (Docker/self-host only)
 
 | Variable | Build-time? | Where it's used |
 | --- | --- | --- |
@@ -180,4 +242,5 @@ Then open `http://localhost:3000`.
 "Build-time" variables must be set as Coolify **Build Variables** (in addition
 to normal runtime env vars) and passed as `--build-arg` for local Podman
 builds, because they're baked into the production build output and can't be
-changed by setting an env var on the running container afterward.
+changed by setting an env var on the running container afterward. **On
+Vercel this distinction doesn't apply** — see step 6 above.

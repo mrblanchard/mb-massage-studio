@@ -18,7 +18,7 @@ export interface SectionDefinition<T extends SectionContent = SectionContent> {
   label: string;
   schema: z.ZodType<T>;
   defaultContent: T;
-  Component: ComponentType<{ content: T }>;
+  Component: ComponentType<{ content: T; id?: string }>;
   EditForm: ComponentType<SectionEditFormProps<T>>;
 }
 

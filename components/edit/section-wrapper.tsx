@@ -8,7 +8,9 @@ import { toast } from "sonner";
 
 import { SectionEditSheet } from "@/components/edit/section-edit-sheet";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useEditMode } from "@/lib/edit/edit-mode-context";
+import { EDIT_HOVER_OUTLINE } from "@/lib/edit/hover-outline";
 import { deleteSection } from "@/lib/sections/actions";
 import type { SectionContent, SectionType } from "@/lib/sections/types";
 
@@ -55,15 +57,21 @@ export function SectionWrapper({ sectionId, sectionType, content, children }: Se
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative outline-1 outline-dashed outline-transparent transition-opacity hover:outline-primary/40 ${
-        isDragging ? "z-10 opacity-50" : ""
-      }`}
+      className={cn(
+        "group relative rounded-md",
+        EDIT_HOVER_OUTLINE,
+        isDragging && "z-10 opacity-50",
+      )}
     >
-      <div className="absolute top-2 right-2 z-20 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      <div
+        data-edit-toolbar
+        className="absolute top-3 right-3 z-20 flex items-center gap-0.5 rounded-full border bg-background/95 p-1 opacity-0 shadow-md backdrop-blur transition-all duration-200 -translate-y-1 group-hover:translate-y-0 group-hover:opacity-100"
+      >
         <Button
           type="button"
-          variant="secondary"
+          variant="ghost"
           size="icon-sm"
+          className="rounded-full text-muted-foreground"
           aria-label="Drag to reorder"
           {...attributes}
           {...listeners}
@@ -72,8 +80,9 @@ export function SectionWrapper({ sectionId, sectionType, content, children }: Se
         </Button>
         <Button
           type="button"
-          variant="secondary"
+          variant="ghost"
           size="icon-sm"
+          className="rounded-full"
           aria-label="Edit section"
           onClick={() => setIsEditOpen(true)}
         >
@@ -81,8 +90,9 @@ export function SectionWrapper({ sectionId, sectionType, content, children }: Se
         </Button>
         <Button
           type="button"
-          variant="destructive"
+          variant="ghost"
           size="icon-sm"
+          className="rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
           aria-label="Delete section"
           disabled={isDeleting}
           onClick={handleDelete}

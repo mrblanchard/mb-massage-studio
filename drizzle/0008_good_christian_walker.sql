@@ -1,0 +1,1 @@
+ALTER TABLE "site_settings" ADD COLUMN "header_sticky" boolean DEFAULT true NOT NULL;

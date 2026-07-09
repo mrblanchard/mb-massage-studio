@@ -1,11 +1,14 @@
 import Image from "next/image";
 
+import { Prose } from "@/components/ui/prose";
 import { cn } from "@/lib/utils";
 import type { AboutContent } from "@/lib/sections/schemas/about";
 
-export function AboutSection({ content }: { content: AboutContent }) {
+export function AboutSection({ content, id }: { content: AboutContent; id?: string }) {
   return (
     <section
+      id={id}
+      aria-labelledby={id ? `${id}-heading` : undefined}
       className={cn(
         "mx-auto grid gap-8 px-4 py-16",
         content.imageUrl ? "max-w-5xl md:grid-cols-2 md:items-center" : "max-w-3xl"
@@ -23,10 +26,8 @@ export function AboutSection({ content }: { content: AboutContent }) {
         </div>
       )}
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">{content.heading}</h2>
-        <p className="mt-4 whitespace-pre-line text-muted-foreground">
-          {content.body}
-        </p>
+        <h2 id={id ? `${id}-heading` : undefined} className="text-3xl tracking-tight">{content.heading}</h2>
+        <Prose html={content.body} className="mt-4 text-muted-foreground" />
       </div>
     </section>
   );

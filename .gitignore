@@ -36,9 +36,13 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+!.env.automation.example
 
 # vercel
 .vercel
+
+# new-client automation output (per-client .env files, local only)
+/new-client-output/
 
 # typescript
 *.tsbuildinfo

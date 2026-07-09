@@ -1,9 +1,13 @@
 import type { TestimonialsContent } from "@/lib/sections/schemas/testimonials";
 
-export function TestimonialsSection({ content }: { content: TestimonialsContent }) {
+export function TestimonialsSection({ content, id }: { content: TestimonialsContent; id?: string }) {
   return (
-    <section className="mx-auto max-w-5xl px-4 py-16">
-      <h2 className="text-center text-3xl font-bold tracking-tight">
+    <section
+      id={id}
+      aria-labelledby={id ? `${id}-heading` : undefined}
+      className="mx-auto max-w-5xl px-4 py-16"
+    >
+      <h2 id={id ? `${id}-heading` : undefined} className="text-center text-3xl tracking-tight">
         {content.heading}
       </h2>
       <div className="mt-10 grid gap-6 sm:grid-cols-2">

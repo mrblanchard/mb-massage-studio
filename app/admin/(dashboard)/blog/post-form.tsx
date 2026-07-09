@@ -7,6 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { ImageUpload } from "@/components/edit/image-upload";
+import { RichTextEditor } from "@/components/edit/rich-text-editor";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -138,8 +139,7 @@ export function PostForm({ post }: { post: Post | null }) {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid || undefined}>
               <FieldLabel htmlFor="body">Body</FieldLabel>
-              <Textarea id="body" rows={12} {...field} />
-              <FieldDescription>Separate paragraphs with a blank line.</FieldDescription>
+              <RichTextEditor value={field.value ?? ""} onChange={field.onChange} />
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}

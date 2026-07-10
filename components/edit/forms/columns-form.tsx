@@ -35,6 +35,8 @@ export function ColumnsEditForm({
         imageUrl: column.imageUrl ?? "",
         content: column.content ?? "",
         payPalButton: column.payPalButton,
+        venmoButton: column.venmoButton,
+        squareButton: column.squareButton,
       })),
     },
   });
@@ -91,6 +93,8 @@ export function ColumnsEditForm({
               )}
             />
             <PayPalButtonEditor control={control} setValue={setValue} columnIndex={index} />
+            <VenmoButtonEditor control={control} setValue={setValue} columnIndex={index} />
+            <SquareButtonEditor control={control} setValue={setValue} columnIndex={index} />
           </div>
         ))}
         <Button
@@ -130,7 +134,6 @@ function PayPalButtonEditor({
             hostedButtonId: "",
             itemName: "Purchase a Gift Card",
             options: [{ label: "", value: "" }],
-            qrCodeUrl: "",
           })
         }
       >
@@ -175,17 +178,123 @@ function PayPalButtonEditor({
           </Field>
         )}
       />
+      <p className="text-xs text-muted-foreground">
+        A QR code linking to this button is generated automatically, in your site&apos;s brand
+        color.
+      </p>
+      <PayPalButtonOptions control={control} columnIndex={columnIndex} />
+    </div>
+  );
+}
+
+function VenmoButtonEditor({
+  control,
+  setValue,
+  columnIndex,
+}: {
+  control: Control<ColumnsContent>;
+  setValue: UseFormSetValue<ColumnsContent>;
+  columnIndex: number;
+}) {
+  const venmoButton = useWatch({ control, name: `columns.${columnIndex}.venmoButton` });
+
+  if (!venmoButton) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => setValue(`columns.${columnIndex}.venmoButton`, { handle: "" })}
+      >
+        <Plus /> Add Venmo button
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-dashed p-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">Venmo button</span>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label="Remove Venmo button"
+          onClick={() => setValue(`columns.${columnIndex}.venmoButton`, undefined)}
+        >
+          <Trash2 />
+        </Button>
+      </div>
       <Controller
         control={control}
-        name={`columns.${columnIndex}.payPalButton.qrCodeUrl`}
-        render={({ field }) => (
-          <Field>
-            <FieldLabel>QR code image (optional)</FieldLabel>
-            <ImageUpload value={field.value} onChange={field.onChange} />
+        name={`columns.${columnIndex}.venmoButton.handle`}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid || undefined}>
+            <FieldLabel>Venmo username</FieldLabel>
+            <Input placeholder="e.g. Melissa-Blanchard-25" {...field} />
+            <FieldError errors={[fieldState.error]} />
           </Field>
         )}
       />
-      <PayPalButtonOptions control={control} columnIndex={columnIndex} />
+      <p className="text-xs text-muted-foreground">
+        Customers are sent to your Venmo profile to complete payment and enter the amount
+        themselves. A matching QR code is generated automatically.
+      </p>
+    </div>
+  );
+}
+
+function SquareButtonEditor({
+  control,
+  setValue,
+  columnIndex,
+}: {
+  control: Control<ColumnsContent>;
+  setValue: UseFormSetValue<ColumnsContent>;
+  columnIndex: number;
+}) {
+  const squareButton = useWatch({ control, name: `columns.${columnIndex}.squareButton` });
+
+  if (!squareButton) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => setValue(`columns.${columnIndex}.squareButton`, { checkoutUrl: "" })}
+      >
+        <Plus /> Add Square button
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-dashed p-3">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">Square button</span>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          aria-label="Remove Square button"
+          onClick={() => setValue(`columns.${columnIndex}.squareButton`, undefined)}
+        >
+          <Trash2 />
+        </Button>
+      </div>
+      <Controller
+        control={control}
+        name={`columns.${columnIndex}.squareButton.checkoutUrl`}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid || undefined}>
+            <FieldLabel>Square checkout link</FieldLabel>
+            <Input placeholder="https://square.link/u/..." {...field} />
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+      <p className="text-xs text-muted-foreground">
+        Create this link from your Square Dashboard (Online Checkout &rarr; Checkout Links). A
+        matching QR code is generated automatically.
+      </p>
     </div>
   );
 }

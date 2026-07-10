@@ -11,16 +11,31 @@ export const payPalButtonSchema = z.object({
       })
     )
     .min(1, "At least one option is required"),
-  qrCodeUrl: z.string().optional(),
+});
+
+export const venmoButtonSchema = z.object({
+  handle: z.string().min(1, "Venmo username is required"),
+});
+
+export const squareButtonSchema = z.object({
+  checkoutUrl: z.string().min(1, "Checkout link is required").url("Enter a valid URL"),
 });
 
 export const columnSchema = z.object({
   imageUrl: z.string().optional(),
   content: z.string().optional(),
   payPalButton: payPalButtonSchema.optional(),
+  venmoButton: venmoButtonSchema.optional(),
+  squareButton: squareButtonSchema.optional(),
+  // Server-derived at render time (see resolvePageSections) — not user-editable.
+  payPalQr: z.string().nullable().optional(),
+  venmoQr: z.string().nullable().optional(),
+  squareQr: z.string().nullable().optional(),
 });
 
 export type PayPalButton = z.infer<typeof payPalButtonSchema>;
+export type VenmoButton = z.infer<typeof venmoButtonSchema>;
+export type SquareButton = z.infer<typeof squareButtonSchema>;
 
 export const columnsSchema = z.object({
   heading: z.string().optional(),

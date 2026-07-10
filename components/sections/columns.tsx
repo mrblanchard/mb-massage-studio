@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { PayPalButtonForm } from "@/components/paypal-button-form";
+import { PaymentMethods } from "@/components/payment-methods";
 import { Prose } from "@/components/ui/prose";
 import { cn } from "@/lib/utils";
 import type { ColumnsContent } from "@/lib/sections/schemas/columns";
@@ -44,7 +44,14 @@ export function ColumnsSection({ content, id }: { content: ColumnsContent; id?: 
             {column.content && (
               <Prose html={column.content} className="text-muted-foreground" />
             )}
-            {column.payPalButton && <PayPalButtonForm {...column.payPalButton} />}
+            <PaymentMethods
+              payPalButton={column.payPalButton}
+              venmoButton={column.venmoButton}
+              squareButton={column.squareButton}
+              payPalQr={column.payPalQr ?? null}
+              venmoQr={column.venmoQr ?? null}
+              squareQr={column.squareQr ?? null}
+            />
           </div>
         ))}
       </div>

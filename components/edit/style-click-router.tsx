@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 import { useEditMode } from "@/lib/edit/edit-mode-context";
+import type { SectionType } from "@/lib/sections/types";
 import type { TypographyRole } from "@/lib/theme/typography-schema";
 
 const MATCH_SELECTOR = 'h1,h2,h3,h4,h5,h6,p,small,[data-slot="button"],a';
@@ -36,7 +37,7 @@ function roleForElement(element: Element): TypographyRole {
  * jumps to its style control instead of navigating/submitting.
  */
 export function StyleClickRouter() {
-  const { isEditMode, requestStyleScroll } = useEditMode();
+  const { isEditMode, requestStyleScroll, requestSectionStyleScroll } = useEditMode();
 
   useEffect(() => {
     if (!isEditMode) return;
@@ -53,16 +54,30 @@ export function StyleClickRouter() {
       if (target.closest("[data-edit-toolbar]")) return;
 
       const match = target.closest(MATCH_SELECTOR);
-      if (!match) return;
+      if (match) {
+        event.preventDefault();
+        event.stopPropagation();
+        requestStyleScroll(roleForElement(match));
+        return;
+      }
 
-      event.preventDefault();
-      event.stopPropagation();
-      requestStyleScroll(roleForElement(match));
+      // Clicked empty space within a section (its background), not a
+      // specific text/button/link element — offer to style that section.
+      const sectionEl = target.closest("[data-section-id]");
+      if (sectionEl) {
+        event.preventDefault();
+        event.stopPropagation();
+        requestSectionStyleScroll({
+          id: sectionEl.getAttribute("data-section-id") ?? "",
+          type: (sectionEl.getAttribute("data-section-type") ?? "hero") as SectionType,
+          backgroundColor: sectionEl.getAttribute("data-section-bg") ?? "",
+        });
+      }
     };
 
     document.addEventListener("click", handleClick, true);
     return () => document.removeEventListener("click", handleClick, true);
-  }, [isEditMode, requestStyleScroll]);
+  }, [isEditMode, requestStyleScroll, requestSectionStyleScroll]);
 
   return null;
 }

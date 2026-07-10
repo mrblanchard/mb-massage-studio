@@ -6,6 +6,7 @@ export interface RawSection {
   id: string;
   type: SectionType;
   content: SectionContent;
+  backgroundColor: string | null;
 }
 
 export async function resolvePageSections(sections: RawSection[]): Promise<RawSection[]> {

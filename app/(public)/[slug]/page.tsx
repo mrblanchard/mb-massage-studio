@@ -56,6 +56,7 @@ export default async function PublicPage({
       id: section.id,
       type: section.type,
       content: section.content,
+      backgroundColor: section.backgroundColor,
     }))
   );
 

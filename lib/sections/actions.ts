@@ -44,6 +44,24 @@ export async function updateSectionContent(sectionId: string, content: SectionCo
   return { success: true };
 }
 
+export async function updateSectionBackgroundColor(sectionId: string, backgroundColor: string | null) {
+  await requireAuth();
+
+  const section = await db.query.sections.findFirst({ where: eq(sections.id, sectionId) });
+  if (!section) {
+    return { error: "Section not found." };
+  }
+
+  await db
+    .update(sections)
+    .set({ backgroundColor, updatedAt: new Date() })
+    .where(eq(sections.id, sectionId));
+
+  await revalidatePageBySlug(section.pageId);
+
+  return { success: true };
+}
+
 export async function addSection(
   pageId: string,
   type: SectionType,

@@ -47,6 +47,7 @@ export default async function HomePage() {
       id: section.id,
       type: section.type,
       content: section.content,
+      backgroundColor: section.backgroundColor,
     }))
   );
 

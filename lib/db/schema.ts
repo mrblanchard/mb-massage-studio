@@ -138,6 +138,7 @@ export const sections = pgTable("sections", {
   type: sectionTypeEnum("type").notNull(),
   order: integer("order").notNull().default(0),
   content: jsonb("content").$type<Record<string, unknown>>().notNull().default({}),
+  backgroundColor: text("background_color"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

@@ -2,7 +2,14 @@
 
 import { createContext, useContext, useState, type ReactNode } from "react";
 
+import type { SectionType } from "@/lib/sections/types";
 import type { StyleSettingsValues, TypographyRole } from "@/lib/theme/typography-schema";
+
+export interface SectionStyleTarget {
+  id: string;
+  type: SectionType;
+  backgroundColor: string;
+}
 
 interface EditModeContextValue {
   canEdit: boolean;
@@ -15,6 +22,10 @@ interface EditModeContextValue {
   scrollToStyleRole: TypographyRole | null;
   requestStyleScroll: (role: TypographyRole) => void;
   clearStyleScrollRequest: () => void;
+  sectionStyleTarget: SectionStyleTarget | null;
+  requestSectionStyleScroll: (target: SectionStyleTarget) => void;
+  setSectionStyleColor: (backgroundColor: string) => void;
+  clearSectionStyleTarget: () => void;
 }
 
 const defaultStyleSettings: StyleSettingsValues = {
@@ -35,6 +46,10 @@ const EditModeContext = createContext<EditModeContextValue>({
   scrollToStyleRole: null,
   requestStyleScroll: () => {},
   clearStyleScrollRequest: () => {},
+  sectionStyleTarget: null,
+  requestSectionStyleScroll: () => {},
+  setSectionStyleColor: () => {},
+  clearSectionStyleTarget: () => {},
 });
 
 export function EditModeProvider({
@@ -52,6 +67,7 @@ export function EditModeProvider({
   );
   const [isStyleSidebarOpen, setStyleSidebarOpen] = useState(false);
   const [scrollToStyleRole, setScrollToStyleRole] = useState<TypographyRole | null>(null);
+  const [sectionStyleTarget, setSectionStyleTarget] = useState<SectionStyleTarget | null>(null);
 
   return (
     <EditModeContext.Provider
@@ -66,9 +82,19 @@ export function EditModeProvider({
         scrollToStyleRole,
         requestStyleScroll: (role) => {
           setStyleSidebarOpen(true);
+          setSectionStyleTarget(null);
           setScrollToStyleRole(role);
         },
         clearStyleScrollRequest: () => setScrollToStyleRole(null),
+        sectionStyleTarget,
+        requestSectionStyleScroll: (target) => {
+          setStyleSidebarOpen(true);
+          setScrollToStyleRole(null);
+          setSectionStyleTarget(target);
+        },
+        setSectionStyleColor: (backgroundColor) =>
+          setSectionStyleTarget((prev) => (prev ? { ...prev, backgroundColor } : prev)),
+        clearSectionStyleTarget: () => setSectionStyleTarget(null),
       }}
     >
       {children}

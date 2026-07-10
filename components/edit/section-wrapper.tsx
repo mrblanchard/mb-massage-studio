@@ -18,10 +18,17 @@ interface SectionWrapperProps {
   sectionId: string;
   sectionType: SectionType;
   content: SectionContent;
+  backgroundColor: string | null;
   children: ReactNode;
 }
 
-export function SectionWrapper({ sectionId, sectionType, content, children }: SectionWrapperProps) {
+export function SectionWrapper({
+  sectionId,
+  sectionType,
+  content,
+  backgroundColor,
+  children,
+}: SectionWrapperProps) {
   const { isEditMode } = useEditMode();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleting, startTransition] = useTransition();
@@ -31,12 +38,13 @@ export function SectionWrapper({ sectionId, sectionType, content, children }: Se
   });
 
   if (!isEditMode) {
-    return <>{children}</>;
+    return backgroundColor ? <div style={{ backgroundColor }}>{children}</div> : <>{children}</>;
   }
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    backgroundColor: backgroundColor ?? undefined,
   };
 
   const handleDelete = () => {
@@ -57,6 +65,9 @@ export function SectionWrapper({ sectionId, sectionType, content, children }: Se
     <div
       ref={setNodeRef}
       style={style}
+      data-section-id={sectionId}
+      data-section-type={sectionType}
+      data-section-bg={backgroundColor ?? ""}
       className={cn(
         "group relative rounded-md",
         EDIT_HOVER_OUTLINE,

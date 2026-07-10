@@ -24,6 +24,7 @@ export interface SectionListItem {
   id: string;
   type: SectionType;
   content: SectionContent;
+  backgroundColor: string | null;
 }
 
 export function SectionList({ pageId, sections }: { pageId: string; sections: SectionListItem[] }) {
@@ -134,7 +135,12 @@ export function SectionList({ pageId, sections }: { pageId: string; sections: Se
 
             return (
               <div key={section.id}>
-                <SectionWrapper sectionId={section.id} sectionType={section.type} content={content}>
+                <SectionWrapper
+                  sectionId={section.id}
+                  sectionType={section.type}
+                  content={content}
+                  backgroundColor={section.backgroundColor}
+                >
                   <Component content={content} id={section.id} />
                 </SectionWrapper>
                 {isEditMode && (

@@ -1,0 +1,1 @@
+ALTER TABLE "sections" ADD COLUMN "background_color" text;

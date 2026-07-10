@@ -18,13 +18,23 @@ import {
   Underline as UnderlineIcon,
   Undo2,
 } from "lucide-react";
+import { marked } from "marked";
 import { useState } from "react";
+import TurndownService from "turndown";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+
+const turndownService = new TurndownService({ headingStyle: "atx" });
+
+function markdownToHtml(markdown: string): string {
+  return marked.parse(markdown, { async: false }) as string;
+}
+
+type SourceMode = "visual" | "html" | "markdown";
 
 interface RichTextEditorProps {
   value: string;
@@ -33,6 +43,9 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+  const [mode, setMode] = useState<SourceMode>("visual");
+  const [sourceText, setSourceText] = useState("");
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -56,18 +69,85 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     );
   }
 
+  const switchMode = (next: SourceMode) => {
+    if (next === mode) return;
+
+    if (next === "visual") {
+      const html = mode === "markdown" ? markdownToHtml(sourceText) : sourceText;
+      editor.commands.setContent(html);
+      onChange(html);
+    } else if (next === "html") {
+      setSourceText(mode === "markdown" ? markdownToHtml(sourceText) : editor.getHTML());
+    } else {
+      setSourceText(mode === "html" ? turndownService.turndown(sourceText) : turndownService.turndown(editor.getHTML()));
+    }
+
+    setMode(next);
+  };
+
+  const handleSourceChange = (next: string) => {
+    setSourceText(next);
+    onChange(mode === "markdown" ? markdownToHtml(next) : next);
+  };
+
   return (
     <div className="rounded-lg border border-input focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
-      <Toolbar editor={editor} />
+      <div className="flex items-center justify-between gap-1 p-1.5">
+        {mode === "visual" ? (
+          <Toolbar editor={editor} />
+        ) : (
+          <span className="px-1.5 text-xs text-muted-foreground">
+            {mode === "html" ? "Editing raw HTML" : "Editing Markdown"}
+          </span>
+        )}
+        <ModeSwitcher mode={mode} onChange={switchMode} />
+      </div>
       <Separator />
-      <EditorContent editor={editor} />
+      {mode === "visual" ? (
+        <EditorContent editor={editor} />
+      ) : (
+        <textarea
+          value={sourceText}
+          onChange={(e) => handleSourceChange(e.target.value)}
+          spellCheck={false}
+          className="min-h-40 w-full resize-y bg-transparent px-3 py-2 font-mono text-sm outline-none"
+        />
+      )}
+    </div>
+  );
+}
+
+function ModeSwitcher({ mode, onChange }: { mode: SourceMode; onChange: (mode: SourceMode) => void }) {
+  const options: { value: SourceMode; label: string }[] = [
+    { value: "visual", label: "Visual" },
+    { value: "html", label: "HTML" },
+    { value: "markdown", label: "Markdown" },
+  ];
+
+  return (
+    <div className="flex shrink-0 gap-0.5 rounded-md border p-0.5">
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => onChange(opt.value)}
+          className={cn(
+            "rounded px-2 py-1 text-xs font-medium transition-colors",
+            mode === opt.value
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:bg-muted",
+          )}
+        >
+          {opt.label}
+        </button>
+      ))}
     </div>
   );
 }
 
 function Toolbar({ editor }: { editor: Editor }) {
   return (
-    <div className="flex flex-wrap items-center gap-1 p-1.5">
+    <div className="flex flex-wrap items-center gap-1">
       <ToolbarButton
         label="Bold"
         active={editor.isActive("bold")}

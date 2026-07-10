@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import type { ComponentType, CSSProperties } from "react";
 import type { z } from "zod";
 
 import type { sectionTypeEnum } from "@/lib/db/schema";
@@ -18,7 +18,7 @@ export interface SectionDefinition<T extends SectionContent = SectionContent> {
   label: string;
   schema: z.ZodType<T>;
   defaultContent: T;
-  Component: ComponentType<{ content: T; id?: string }>;
+  Component: ComponentType<{ content: T; id?: string; sectionPadding?: CSSProperties }>;
   EditForm: ComponentType<SectionEditFormProps<T>>;
 }
 

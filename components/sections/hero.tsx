@@ -1,11 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { HeroContent } from "@/lib/sections/schemas/hero";
 
-export function HeroSection({ content, id }: { content: HeroContent; id?: string }) {
+export function HeroSection({
+  content,
+  id,
+  sectionPadding,
+}: {
+  content: HeroContent;
+  id?: string;
+  sectionPadding?: CSSProperties;
+}) {
   const headingId = id ? `${id}-heading` : undefined;
 
   if (content.layout === "overlay" && content.imageUrl) {
@@ -37,7 +46,10 @@ export function HeroSection({ content, id }: { content: HeroContent; id?: string
           sizes="100vw"
         />
         <div className={`absolute inset-0 ${overlayClass}`} />
-        <div className="relative z-10 flex flex-col items-center gap-4 px-4 py-24 text-center text-white">
+        <div
+          className="relative z-10 flex flex-col items-center gap-4 px-4 py-24 text-center text-white"
+          style={sectionPadding}
+        >
           {content.logoUrl && (
             <div className={`relative aspect-square max-w-full ${logoSizeClass}`}>
               <Image src={content.logoUrl} alt="" fill className="object-contain" />
@@ -85,6 +97,7 @@ export function HeroSection({ content, id }: { content: HeroContent; id?: string
         "mx-auto grid max-w-5xl gap-8 px-4 py-16 sm:py-24",
         content.imageUrl && "md:grid-cols-2 md:items-center"
       )}
+      style={sectionPadding}
     >
       <div
         className={cn(

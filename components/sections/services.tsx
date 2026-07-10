@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import { cn } from "@/lib/utils";
 import type { ServicesContent } from "@/lib/sections/schemas/services";
 
@@ -8,7 +10,15 @@ const justifyClasses: Record<string, string> = {
   full: "justify-start",
 };
 
-export function ServicesSection({ content, id }: { content: ServicesContent; id?: string }) {
+export function ServicesSection({
+  content,
+  id,
+  sectionPadding,
+}: {
+  content: ServicesContent;
+  id?: string;
+  sectionPadding?: CSSProperties;
+}) {
   const alignment = content.alignment ?? "center";
 
   return (
@@ -16,6 +26,7 @@ export function ServicesSection({ content, id }: { content: ServicesContent; id?
       id={id}
       aria-labelledby={id ? `${id}-heading` : undefined}
       className="mx-auto max-w-5xl px-4 py-16"
+      style={sectionPadding}
     >
       <h2 id={id ? `${id}-heading` : undefined} className="text-center text-3xl tracking-tight">
         {content.heading}

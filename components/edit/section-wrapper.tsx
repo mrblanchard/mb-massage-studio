@@ -3,7 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Pencil, Trash2 } from "lucide-react";
-import { useState, useTransition, type ReactNode } from "react";
+import { cloneElement, isValidElement, useState, useTransition, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { SectionEditSheet } from "@/components/edit/section-edit-sheet";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useEditMode } from "@/lib/edit/edit-mode-context";
 import { EDIT_HOVER_OUTLINE } from "@/lib/edit/hover-outline";
 import { deleteSection } from "@/lib/sections/actions";
+import { borderAndMarginStyle, paddingStyle, type SectionStyleOverrides } from "@/lib/sections/section-style";
 import type { SectionContent, SectionType } from "@/lib/sections/types";
 
 interface SectionWrapperProps {
@@ -19,6 +20,7 @@ interface SectionWrapperProps {
   sectionType: SectionType;
   content: SectionContent;
   backgroundColor: string | null;
+  styleOverrides: SectionStyleOverrides;
   children: ReactNode;
 }
 
@@ -27,6 +29,7 @@ export function SectionWrapper({
   sectionType,
   content,
   backgroundColor,
+  styleOverrides,
   children,
 }: SectionWrapperProps) {
   const { isEditMode, sectionStyleTarget } = useEditMode();
@@ -38,21 +41,31 @@ export function SectionWrapper({
   });
 
   if (!isEditMode) {
-    return backgroundColor ? <div style={{ backgroundColor }}>{children}</div> : <>{children}</>;
+    const wrapperStyle = { backgroundColor: backgroundColor ?? undefined, ...borderAndMarginStyle(styleOverrides) };
+    const renderedChildren = isValidElement(children)
+      ? cloneElement(children, { sectionPadding: paddingStyle(styleOverrides) } as Record<string, unknown>)
+      : children;
+    return <div style={wrapperStyle}>{renderedChildren}</div>;
   }
 
   // While this section is the active target in the Style Sidebar, preview its
-  // pending (unsaved) color live instead of the last-persisted value.
+  // pending (unsaved) style live instead of the last-persisted values.
   const isActiveTarget = sectionStyleTarget?.id === sectionId;
   const effectiveBackgroundColor = isActiveTarget
     ? sectionStyleTarget.backgroundColor || undefined
     : (backgroundColor ?? undefined);
+  const effectiveOverrides = isActiveTarget ? sectionStyleTarget.overrides : styleOverrides;
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     backgroundColor: effectiveBackgroundColor,
+    ...borderAndMarginStyle(effectiveOverrides),
   };
+
+  const paddedChildren = isValidElement(children)
+    ? cloneElement(children, { sectionPadding: paddingStyle(effectiveOverrides) } as Record<string, unknown>)
+    : children;
 
   const handleDelete = () => {
     if (!window.confirm("Delete this section? This cannot be undone.")) {
@@ -75,6 +88,7 @@ export function SectionWrapper({
       data-section-id={sectionId}
       data-section-type={sectionType}
       data-section-bg={effectiveBackgroundColor ?? ""}
+      data-section-style={JSON.stringify(effectiveOverrides)}
       className={cn(
         "group relative rounded-md",
         EDIT_HOVER_OUTLINE,
@@ -118,7 +132,7 @@ export function SectionWrapper({
           <Trash2 />
         </Button>
       </div>
-      {children}
+      {paddedChildren}
       <SectionEditSheet
         sectionId={sectionId}
         sectionType={sectionType}

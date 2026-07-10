@@ -1,8 +1,18 @@
+import type { CSSProperties } from "react";
+
 import { Prose } from "@/components/ui/prose";
 import { cn } from "@/lib/utils";
 import type { TwoColumnContent } from "@/lib/sections/schemas/two-column";
 
-export function TwoColumnSection({ content, id }: { content: TwoColumnContent; id?: string }) {
+export function TwoColumnSection({
+  content,
+  id,
+  sectionPadding,
+}: {
+  content: TwoColumnContent;
+  id?: string;
+  sectionPadding?: CSSProperties;
+}) {
   const headingId = id ? `${id}-heading` : undefined;
   const pos = content.sidebarPosition ?? "right";
   const width = content.mainWidth ?? "70";
@@ -12,6 +22,7 @@ export function TwoColumnSection({ content, id }: { content: TwoColumnContent; i
       id={id}
       aria-labelledby={content.heading ? headingId : undefined}
       className="mx-auto max-w-5xl px-4 py-16"
+      style={sectionPadding}
     >
       {content.heading && (
         <h2 id={headingId} className="mb-8 text-3xl tracking-tight">

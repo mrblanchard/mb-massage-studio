@@ -7,6 +7,7 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import { pages, sections } from "@/lib/db/schema";
 import { sectionRegistry } from "@/lib/sections/registry";
+import type { SectionStyleOverrides } from "@/lib/sections/section-style";
 import type { SectionContent, SectionType } from "@/lib/sections/types";
 
 async function revalidatePageBySlug(pageId: string) {
@@ -44,7 +45,10 @@ export async function updateSectionContent(sectionId: string, content: SectionCo
   return { success: true };
 }
 
-export async function updateSectionBackgroundColor(sectionId: string, backgroundColor: string | null) {
+export async function updateSectionStyle(
+  sectionId: string,
+  style: { backgroundColor: string | null; overrides: SectionStyleOverrides },
+) {
   await requireAuth();
 
   const section = await db.query.sections.findFirst({ where: eq(sections.id, sectionId) });
@@ -54,7 +58,11 @@ export async function updateSectionBackgroundColor(sectionId: string, background
 
   await db
     .update(sections)
-    .set({ backgroundColor, updatedAt: new Date() })
+    .set({
+      backgroundColor: style.backgroundColor,
+      styleOverrides: style.overrides,
+      updatedAt: new Date(),
+    })
     .where(eq(sections.id, sectionId));
 
   await revalidatePageBySlug(section.pageId);

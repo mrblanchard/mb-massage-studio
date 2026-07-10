@@ -1,11 +1,20 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 
 import { PaymentMethods } from "@/components/payment-methods";
 import { Prose } from "@/components/ui/prose";
 import { cn } from "@/lib/utils";
 import type { ColumnsContent } from "@/lib/sections/schemas/columns";
 
-export function ColumnsSection({ content, id }: { content: ColumnsContent; id?: string }) {
+export function ColumnsSection({
+  content,
+  id,
+  sectionPadding,
+}: {
+  content: ColumnsContent;
+  id?: string;
+  sectionPadding?: CSSProperties;
+}) {
   const headingId = id ? `${id}-heading` : undefined;
   const count = content.columns.length;
 
@@ -14,6 +23,7 @@ export function ColumnsSection({ content, id }: { content: ColumnsContent; id?: 
       id={id}
       aria-labelledby={content.heading ? headingId : undefined}
       className="mx-auto max-w-6xl px-4 py-16"
+      style={sectionPadding}
     >
       {content.heading && (
         <h2 id={headingId} className="mb-10 text-center text-3xl tracking-tight">

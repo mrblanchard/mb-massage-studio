@@ -1,10 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 import { cn } from "@/lib/utils";
 import type { BlogListContent } from "@/lib/sections/schemas/blog-list";
 
-export function BlogListSection({ content, id }: { content: BlogListContent; id?: string }) {
+export function BlogListSection({
+  content,
+  id,
+  sectionPadding,
+}: {
+  content: BlogListContent;
+  id?: string;
+  sectionPadding?: CSSProperties;
+}) {
   const posts = content.posts ?? [];
 
   return (
@@ -12,6 +21,7 @@ export function BlogListSection({ content, id }: { content: BlogListContent; id?
       id={id}
       aria-labelledby={id && content.heading ? `${id}-heading` : undefined}
       className="mx-auto max-w-5xl px-4 py-16"
+      style={sectionPadding}
     >
       {content.heading && (
         <h2 id={id ? `${id}-heading` : undefined} className="text-center text-3xl tracking-tight">{content.heading}</h2>

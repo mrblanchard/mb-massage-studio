@@ -17,6 +17,7 @@ import { SectionWrapper } from "@/components/edit/section-wrapper";
 import { useEditMode } from "@/lib/edit/edit-mode-context";
 import { addSection, reorderSections } from "@/lib/sections/actions";
 import { sectionRegistry } from "@/lib/sections/registry";
+import type { SectionStyleOverrides } from "@/lib/sections/section-style";
 import { uploadImage } from "@/lib/uploads/upload-image";
 import type { SectionContent, SectionType } from "@/lib/sections/types";
 
@@ -25,6 +26,7 @@ export interface SectionListItem {
   type: SectionType;
   content: SectionContent;
   backgroundColor: string | null;
+  styleOverrides: SectionStyleOverrides;
 }
 
 export function SectionList({ pageId, sections }: { pageId: string; sections: SectionListItem[] }) {
@@ -140,6 +142,7 @@ export function SectionList({ pageId, sections }: { pageId: string; sections: Se
                   sectionType={section.type}
                   content={content}
                   backgroundColor={section.backgroundColor}
+                  styleOverrides={section.styleOverrides}
                 >
                   <Component content={content} id={section.id} />
                 </SectionWrapper>

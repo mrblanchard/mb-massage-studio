@@ -1,12 +1,21 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 import { Button } from "@/components/ui/button";
 import type { CtaContent } from "@/lib/sections/schemas/cta";
 
-export function CtaSection({ content, id }: { content: CtaContent; id?: string }) {
+export function CtaSection({
+  content,
+  id,
+  sectionPadding,
+}: {
+  content: CtaContent;
+  id?: string;
+  sectionPadding?: CSSProperties;
+}) {
   return (
     <section id={id} aria-labelledby={id ? `${id}-heading` : undefined} className="border-y bg-muted/40">
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-3xl px-4 py-16 text-center" style={sectionPadding}>
         <h2 id={id ? `${id}-heading` : undefined} className="text-3xl tracking-tight">{content.heading}</h2>
         {content.body && (
           <p className="mt-4 text-muted-foreground">{content.body}</p>

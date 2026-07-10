@@ -67,10 +67,17 @@ export function StyleClickRouter() {
       if (sectionEl) {
         event.preventDefault();
         event.stopPropagation();
+        let overrides = {};
+        try {
+          overrides = JSON.parse(sectionEl.getAttribute("data-section-style") || "{}");
+        } catch {
+          overrides = {};
+        }
         requestSectionStyleScroll({
           id: sectionEl.getAttribute("data-section-id") ?? "",
           type: (sectionEl.getAttribute("data-section-type") ?? "hero") as SectionType,
           backgroundColor: sectionEl.getAttribute("data-section-bg") ?? "",
+          overrides,
         });
       }
     };

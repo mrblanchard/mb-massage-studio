@@ -1,14 +1,24 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 
 import { cn } from "@/lib/utils";
 import type { GalleryContent } from "@/lib/sections/schemas/gallery";
 
-export function GallerySection({ content, id }: { content: GalleryContent; id?: string }) {
+export function GallerySection({
+  content,
+  id,
+  sectionPadding,
+}: {
+  content: GalleryContent;
+  id?: string;
+  sectionPadding?: CSSProperties;
+}) {
   return (
     <section
       id={id}
       aria-labelledby={id && content.heading ? `${id}-heading` : undefined}
       className="mx-auto max-w-5xl px-4 py-16"
+      style={sectionPadding}
     >
       {content.heading && (
         <h2 id={id ? `${id}-heading` : undefined} className="text-center text-3xl tracking-tight">

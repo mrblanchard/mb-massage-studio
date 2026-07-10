@@ -139,6 +139,22 @@ export const sections = pgTable("sections", {
   order: integer("order").notNull().default(0),
   content: jsonb("content").$type<Record<string, unknown>>().notNull().default({}),
   backgroundColor: text("background_color"),
+  styleOverrides: jsonb("style_overrides")
+    .$type<{
+      borderColor?: string;
+      borderStyle?: "solid" | "dashed" | "dotted" | "none";
+      borderWidth?: number;
+      marginTop?: number;
+      marginRight?: number;
+      marginBottom?: number;
+      marginLeft?: number;
+      paddingTop?: number;
+      paddingRight?: number;
+      paddingBottom?: number;
+      paddingLeft?: number;
+    }>()
+    .notNull()
+    .default({}),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

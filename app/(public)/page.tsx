@@ -48,6 +48,7 @@ export default async function HomePage() {
       type: section.type,
       content: section.content,
       backgroundColor: section.backgroundColor,
+      styleOverrides: section.styleOverrides,
     }))
   );
 

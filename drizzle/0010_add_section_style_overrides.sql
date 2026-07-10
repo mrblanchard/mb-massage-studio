@@ -1,0 +1,1 @@
+ALTER TABLE "sections" ADD COLUMN "style_overrides" jsonb DEFAULT '{}'::jsonb NOT NULL;

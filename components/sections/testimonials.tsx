@@ -1,11 +1,22 @@
+import type { CSSProperties } from "react";
+
 import type { TestimonialsContent } from "@/lib/sections/schemas/testimonials";
 
-export function TestimonialsSection({ content, id }: { content: TestimonialsContent; id?: string }) {
+export function TestimonialsSection({
+  content,
+  id,
+  sectionPadding,
+}: {
+  content: TestimonialsContent;
+  id?: string;
+  sectionPadding?: CSSProperties;
+}) {
   return (
     <section
       id={id}
       aria-labelledby={id ? `${id}-heading` : undefined}
       className="mx-auto max-w-5xl px-4 py-16"
+      style={sectionPadding}
     >
       <h2 id={id ? `${id}-heading` : undefined} className="text-center text-3xl tracking-tight">
         {content.heading}

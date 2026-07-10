@@ -2,6 +2,7 @@ import { getSiteSettings } from "@/lib/db/queries/site-settings";
 import { getPublishedPosts } from "@/lib/db/queries/posts";
 import { generateQrDataUrl } from "@/lib/payments/qr";
 import { columnsSchema } from "@/lib/sections/schemas/columns";
+import type { SectionStyleOverrides } from "@/lib/sections/section-style";
 import { blogListDefaultContent, blogListSchema, type BlogListPost } from "@/lib/sections/schemas/blog-list";
 import type { SectionContent, SectionType } from "@/lib/sections/types";
 
@@ -10,6 +11,7 @@ export interface RawSection {
   type: SectionType;
   content: SectionContent;
   backgroundColor: string | null;
+  styleOverrides: SectionStyleOverrides;
 }
 
 export async function resolvePageSections(sections: RawSection[]): Promise<RawSection[]> {

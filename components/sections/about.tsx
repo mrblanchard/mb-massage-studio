@@ -1,10 +1,19 @@
 import Image from "next/image";
+import type { CSSProperties } from "react";
 
 import { Prose } from "@/components/ui/prose";
 import { cn } from "@/lib/utils";
 import type { AboutContent } from "@/lib/sections/schemas/about";
 
-export function AboutSection({ content, id }: { content: AboutContent; id?: string }) {
+export function AboutSection({
+  content,
+  id,
+  sectionPadding,
+}: {
+  content: AboutContent;
+  id?: string;
+  sectionPadding?: CSSProperties;
+}) {
   return (
     <section
       id={id}
@@ -13,6 +22,7 @@ export function AboutSection({ content, id }: { content: AboutContent; id?: stri
         "mx-auto grid gap-8 px-4 py-16",
         content.imageUrl ? "max-w-5xl md:grid-cols-2 md:items-center" : "max-w-3xl"
       )}
+      style={sectionPadding}
     >
       {content.imageUrl && (
         <div className="relative aspect-square w-full overflow-hidden rounded-lg md:order-last">

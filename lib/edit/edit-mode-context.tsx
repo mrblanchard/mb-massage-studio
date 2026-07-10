@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, type ReactNode } from "react";
 
+import type { SectionStyleOverrides } from "@/lib/sections/section-style";
 import type { SectionType } from "@/lib/sections/types";
 import type { StyleSettingsValues, TypographyRole } from "@/lib/theme/typography-schema";
 
@@ -9,6 +10,7 @@ export interface SectionStyleTarget {
   id: string;
   type: SectionType;
   backgroundColor: string;
+  overrides: SectionStyleOverrides;
 }
 
 interface EditModeContextValue {
@@ -25,6 +27,7 @@ interface EditModeContextValue {
   sectionStyleTarget: SectionStyleTarget | null;
   requestSectionStyleScroll: (target: SectionStyleTarget) => void;
   setSectionStyleColor: (backgroundColor: string) => void;
+  setSectionStyleOverrides: (patch: Partial<SectionStyleOverrides>) => void;
   clearSectionStyleTarget: () => void;
 }
 
@@ -49,6 +52,7 @@ const EditModeContext = createContext<EditModeContextValue>({
   sectionStyleTarget: null,
   requestSectionStyleScroll: () => {},
   setSectionStyleColor: () => {},
+  setSectionStyleOverrides: () => {},
   clearSectionStyleTarget: () => {},
 });
 
@@ -94,6 +98,10 @@ export function EditModeProvider({
         },
         setSectionStyleColor: (backgroundColor) =>
           setSectionStyleTarget((prev) => (prev ? { ...prev, backgroundColor } : prev)),
+        setSectionStyleOverrides: (patch) =>
+          setSectionStyleTarget((prev) =>
+            prev ? { ...prev, overrides: { ...prev.overrides, ...patch } } : prev,
+          ),
         clearSectionStyleTarget: () => setSectionStyleTarget(null),
       }}
     >

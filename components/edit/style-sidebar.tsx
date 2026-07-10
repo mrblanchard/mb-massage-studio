@@ -19,7 +19,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useEditMode } from "@/lib/edit/edit-mode-context";
 import { fontOptions, fontRegistry } from "@/lib/fonts";
-import { updateSectionBackgroundColor } from "@/lib/sections/actions";
+import { updateSectionStyle } from "@/lib/sections/actions";
+import type { SectionStyleOverrides } from "@/lib/sections/section-style";
 import type { SectionType } from "@/lib/sections/types";
 import { typographyRoles, type TypographyRole } from "@/lib/theme/typography-schema";
 
@@ -60,6 +61,57 @@ function fontFamilyValue(name: string | undefined) {
   return font ? `var(${font.cssVar})` : undefined;
 }
 
+const numberInputClass =
+  "h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+
+function SpacingInputs({
+  legend,
+  prefix,
+  overrides,
+  onChange,
+}: {
+  legend: string;
+  prefix: "padding" | "margin";
+  overrides: SectionStyleOverrides;
+  onChange: (patch: Partial<SectionStyleOverrides>) => void;
+}) {
+  const sides = [
+    { key: "Top", label: "T" },
+    { key: "Right", label: "R" },
+    { key: "Bottom", label: "B" },
+    { key: "Left", label: "L" },
+  ] as const;
+
+  return (
+    <Field>
+      <FieldLabel className="text-xs text-muted-foreground">{legend} (rem)</FieldLabel>
+      <div className="grid grid-cols-4 gap-1.5">
+        {sides.map(({ key, label }) => {
+          const field = `${prefix}${key}` as keyof SectionStyleOverrides;
+          const value = overrides[field] as number | undefined;
+          return (
+            <div key={key} className="flex flex-col items-center gap-1">
+              <span className="text-[10px] text-muted-foreground">{label}</span>
+              <input
+                type="number"
+                step="0.25"
+                value={value ?? ""}
+                placeholder="0"
+                onChange={(e) =>
+                  onChange({
+                    [field]: e.target.value === "" ? undefined : Number(e.target.value),
+                  })
+                }
+                className={numberInputClass}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </Field>
+  );
+}
+
 export function StyleSidebar() {
   const {
     canEdit,
@@ -72,6 +124,7 @@ export function StyleSidebar() {
     clearStyleScrollRequest,
     sectionStyleTarget,
     setSectionStyleColor,
+    setSectionStyleOverrides,
     clearSectionStyleTarget,
   } = useEditMode();
   const [isSaving, startTransition] = useTransition();
@@ -108,10 +161,13 @@ export function StyleSidebar() {
 
   const handleSave = () => {
     startTransition(async () => {
-      const results = await Promise.all([
+      const results: Array<{ error?: string } | undefined> = await Promise.all([
         updateTypographySettings(styleSettings),
         sectionStyleTarget
-          ? updateSectionBackgroundColor(sectionStyleTarget.id, sectionStyleTarget.backgroundColor || null)
+          ? updateSectionStyle(sectionStyleTarget.id, {
+              backgroundColor: sectionStyleTarget.backgroundColor || null,
+              overrides: sectionStyleTarget.overrides,
+            })
           : Promise.resolve(undefined),
       ]);
       const error = results.find((r) => r?.error)?.error;
@@ -186,7 +242,7 @@ export function StyleSidebar() {
             <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0">
               <div>
                 <CardTitle>{SECTION_TYPE_LABELS[sectionStyleTarget.type]} section</CardTitle>
-                <CardDescription>Background color for this section</CardDescription>
+                <CardDescription>Background, border, padding &amp; margin</CardDescription>
               </div>
               <Button
                 type="button"
@@ -198,11 +254,76 @@ export function StyleSidebar() {
                 <X className="size-3.5" />
               </Button>
             </CardHeader>
-            <CardContent>
-              <ColorField
-                ariaLabel="Section background color"
-                value={sectionStyleTarget.backgroundColor || undefined}
-                onChange={setSectionStyleColor}
+            <CardContent className="flex flex-col gap-4">
+              <Field>
+                <FieldLabel className="text-xs text-muted-foreground">Background</FieldLabel>
+                <ColorField
+                  ariaLabel="Section background color"
+                  value={sectionStyleTarget.backgroundColor || undefined}
+                  onChange={setSectionStyleColor}
+                />
+              </Field>
+
+              <div className="grid grid-cols-3 gap-2.5">
+                <Field className="col-span-1">
+                  <FieldLabel className="text-xs text-muted-foreground">Border style</FieldLabel>
+                  <Select
+                    value={sectionStyleTarget.overrides.borderStyle ?? "none"}
+                    onValueChange={(value) =>
+                      setSectionStyleOverrides({
+                        borderStyle: (value ?? "none") as SectionStyleOverrides["borderStyle"],
+                      })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="solid">Solid</SelectItem>
+                      <SelectItem value="dashed">Dashed</SelectItem>
+                      <SelectItem value="dotted">Dotted</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Field className="col-span-1">
+                  <FieldLabel className="text-xs text-muted-foreground">Width (px)</FieldLabel>
+                  <input
+                    type="number"
+                    min={0}
+                    step="1"
+                    value={sectionStyleTarget.overrides.borderWidth ?? ""}
+                    placeholder="1"
+                    disabled={!sectionStyleTarget.overrides.borderStyle || sectionStyleTarget.overrides.borderStyle === "none"}
+                    onChange={(e) =>
+                      setSectionStyleOverrides({
+                        borderWidth: e.target.value === "" ? undefined : Number(e.target.value),
+                      })
+                    }
+                    className={cn(numberInputClass, "disabled:opacity-50")}
+                  />
+                </Field>
+                <Field className="col-span-1">
+                  <FieldLabel className="text-xs text-muted-foreground">Color</FieldLabel>
+                  <ColorField
+                    ariaLabel="Border color"
+                    value={sectionStyleTarget.overrides.borderColor || undefined}
+                    onChange={(value) => setSectionStyleOverrides({ borderColor: value || undefined })}
+                  />
+                </Field>
+              </div>
+
+              <SpacingInputs
+                legend="Padding"
+                prefix="padding"
+                overrides={sectionStyleTarget.overrides}
+                onChange={setSectionStyleOverrides}
+              />
+              <SpacingInputs
+                legend="Margin"
+                prefix="margin"
+                overrides={sectionStyleTarget.overrides}
+                onChange={setSectionStyleOverrides}
               />
             </CardContent>
           </Card>

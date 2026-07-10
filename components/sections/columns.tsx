@@ -48,7 +48,6 @@ export function ColumnsSection({ content, id }: { content: ColumnsContent; id?: 
               payPalButton={column.payPalButton}
               venmoButton={column.venmoButton}
               squareButton={column.squareButton}
-              payPalQr={column.payPalQr ?? null}
               venmoQr={column.venmoQr ?? null}
               squareQr={column.squareQr ?? null}
             />

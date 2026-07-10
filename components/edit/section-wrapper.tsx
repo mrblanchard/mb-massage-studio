@@ -29,7 +29,7 @@ export function SectionWrapper({
   backgroundColor,
   children,
 }: SectionWrapperProps) {
-  const { isEditMode } = useEditMode();
+  const { isEditMode, sectionStyleTarget } = useEditMode();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleting, startTransition] = useTransition();
 
@@ -41,10 +41,17 @@ export function SectionWrapper({
     return backgroundColor ? <div style={{ backgroundColor }}>{children}</div> : <>{children}</>;
   }
 
+  // While this section is the active target in the Style Sidebar, preview its
+  // pending (unsaved) color live instead of the last-persisted value.
+  const isActiveTarget = sectionStyleTarget?.id === sectionId;
+  const effectiveBackgroundColor = isActiveTarget
+    ? sectionStyleTarget.backgroundColor || undefined
+    : (backgroundColor ?? undefined);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    backgroundColor: backgroundColor ?? undefined,
+    backgroundColor: effectiveBackgroundColor,
   };
 
   const handleDelete = () => {
@@ -67,7 +74,7 @@ export function SectionWrapper({
       style={style}
       data-section-id={sectionId}
       data-section-type={sectionType}
-      data-section-bg={backgroundColor ?? ""}
+      data-section-bg={effectiveBackgroundColor ?? ""}
       className={cn(
         "group relative rounded-md",
         EDIT_HOVER_OUTLINE,

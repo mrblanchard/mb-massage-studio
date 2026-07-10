@@ -178,10 +178,6 @@ function PayPalButtonEditor({
           </Field>
         )}
       />
-      <p className="text-xs text-muted-foreground">
-        A QR code linking to this button is generated automatically, in your site&apos;s brand
-        color.
-      </p>
       <PayPalButtonOptions control={control} columnIndex={columnIndex} />
     </div>
   );

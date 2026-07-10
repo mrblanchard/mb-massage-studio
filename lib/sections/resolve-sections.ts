@@ -12,10 +12,6 @@ export interface RawSection {
   backgroundColor: string | null;
 }
 
-function paypalPaymentUrl(hostedButtonId: string) {
-  return `https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=${encodeURIComponent(hostedButtonId)}`;
-}
-
 export async function resolvePageSections(sections: RawSection[]): Promise<RawSection[]> {
   let accentColorPromise: Promise<string> | null = null;
   const getAccentColor = () => {
@@ -60,12 +56,6 @@ export async function resolvePageSections(sections: RawSection[]): Promise<RawSe
         const columns = await Promise.all(
           parsed.data.columns.map(async (column) => ({
             ...column,
-            payPalQr: column.payPalButton
-              ? await generateQrDataUrl(
-                  paypalPaymentUrl(column.payPalButton.hostedButtonId),
-                  accentColor,
-                )
-              : null,
             venmoQr: column.venmoButton
               ? await generateQrDataUrl(`https://venmo.com/u/${column.venmoButton.handle}`, accentColor)
               : null,

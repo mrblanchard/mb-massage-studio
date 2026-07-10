@@ -28,7 +28,6 @@ export const columnSchema = z.object({
   venmoButton: venmoButtonSchema.optional(),
   squareButton: squareButtonSchema.optional(),
   // Server-derived at render time (see resolvePageSections) — not user-editable.
-  payPalQr: z.string().nullable().optional(),
   venmoQr: z.string().nullable().optional(),
   squareQr: z.string().nullable().optional(),
 });

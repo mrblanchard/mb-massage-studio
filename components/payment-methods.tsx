@@ -7,7 +7,6 @@ interface PaymentMethodsProps {
   payPalButton?: PayPalButton;
   venmoButton?: VenmoButton;
   squareButton?: SquareButton;
-  payPalQr: string | null;
   venmoQr: string | null;
   squareQr: string | null;
 }
@@ -31,7 +30,6 @@ export function PaymentMethods({
   payPalButton,
   venmoButton,
   squareButton,
-  payPalQr,
   venmoQr,
   squareQr,
 }: PaymentMethodsProps) {
@@ -74,7 +72,6 @@ export function PaymentMethods({
               Buy Now with PayPal
             </Button>
           </form>
-          {payPalQr && <QrImage src={payPalQr} alt="Scan to pay with PayPal" />}
         </div>
       )}
 

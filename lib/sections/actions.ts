@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import { pages, sections } from "@/lib/db/schema";
+import { withTransaction } from "@/lib/db/transaction";
 import { sectionRegistry } from "@/lib/sections/registry";
 import type { SectionStyleOverrides } from "@/lib/sections/section-style";
 import type { SectionContent, SectionType } from "@/lib/sections/types";
@@ -104,7 +105,7 @@ export async function addSection(
 
   // Insert at the beginning
   if (afterSectionId === null) {
-    await db.transaction(async (tx) => {
+    await withTransaction(async (tx) => {
       await tx
         .update(sections)
         .set({ order: sql`${sections.order} + 1`, updatedAt: new Date() })
@@ -125,7 +126,7 @@ export async function addSection(
     return { error: "Target section not found." };
   }
 
-  await db.transaction(async (tx) => {
+  await withTransaction(async (tx) => {
     await tx
       .update(sections)
       .set({ order: sql`${sections.order} + 1`, updatedAt: new Date() })
@@ -156,7 +157,7 @@ export async function deleteSection(sectionId: string) {
 export async function reorderSections(pageId: string, orderedIds: string[]) {
   await requireAuth();
 
-  await db.transaction(async (tx) => {
+  await withTransaction(async (tx) => {
     for (let index = 0; index < orderedIds.length; index++) {
       await tx
         .update(sections)
